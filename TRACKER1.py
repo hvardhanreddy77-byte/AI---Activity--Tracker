@@ -1,6 +1,6 @@
 
 import json
-
+import traceback
 import os
 import time
 from datetime import datetime
@@ -129,9 +129,14 @@ while True:
     try:
         title = get_active_title()
     except Exception as e:
+
         with open("error.log", "a", encoding="utf-8") as f:
-            f.write(f"{datetime.now()} : {str(e)}\n")
-        time.sleep(5)
+            f.write(
+                f"\n{datetime.now()}\n"
+            )
+            f.write(traceback.format_exc())
+            f.write("\n")
+            time.sleep(5)
         
 
         if not title:
