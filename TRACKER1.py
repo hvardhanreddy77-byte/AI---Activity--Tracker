@@ -1,4 +1,3 @@
-
 import json
 import traceback
 import os
@@ -13,8 +12,8 @@ import pygetwindow as gw
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)
-LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 today = datetime.now().strftime("%Y-%m-%d")
@@ -24,10 +23,11 @@ LOG_FILE = os.path.join(
     f"{today}.json"
 )
 
+# How often to check active window
 INTERVAL = 15
 
 # ---------------------------------
-# CREATE FILE IF NOT EXISTS
+# CREATE LOG FILE IF NEEDED
 # ---------------------------------
 
 if not os.path.exists(LOG_FILE):
@@ -48,7 +48,7 @@ def get_active_title():
         if window:
             return window.title
 
-    except:
+    except Exception:
         pass
 
     return None
@@ -58,6 +58,9 @@ def get_active_title():
 # ---------------------------------
 
 def get_site(title):
+
+    if not title:
+        return "Other"
 
     t = title.lower()
 
@@ -98,7 +101,7 @@ def load_log():
         with open(LOG_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    except:
+    except Exception:
         return []
 
 # ---------------------------------
@@ -108,6 +111,7 @@ def load_log():
 def save_log(data):
 
     with open(LOG_FILE, "w", encoding="utf-8") as f:
+
         json.dump(
             data,
             f,
@@ -119,46 +123,70 @@ def save_log(data):
 # TRACKER
 # ---------------------------------
 
-print("Tracker Started...")
-print("Logging to:", LOG_FILE)
-
-last_title = None
-
+last_title = get_active_title()
+last_time = time.time()
 
 while True:
+
     try:
-        title = get_active_title()
-    except Exception as e:
 
-        with open("error.log", "a", encoding="utf-8") as f:
-            f.write(
-                f"\n{datetime.now()}\n"
-            )
-            f.write(traceback.format_exc())
-            f.write("\n")
-            time.sleep(5)
-        
+        time.sleep(INTERVAL)
 
-        if not title:
-            time.sleep(INTERVAL)
+        current_title = get_active_title()
+
+        if not current_title:
             continue
 
-        if title == last_title:
-            time.sleep(INTERVAL)
+        # Same window → keep counting time
+        if current_title == last_title:
             continue
 
-        last_title = title
+        duration = int(
+            time.time() - last_time
+        )
 
+        # Save previous activity
         entry = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "site": get_site(title),
-            "title": title
+
+            "timestamp":
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+
+            "site":
+            get_site(last_title),
+
+            "title":
+            last_title,
+
+            "duration_seconds":
+            duration
         }
 
         data = load_log()
         data.append(entry)
         save_log(data)
 
-        print(entry)
+        # Start tracking new window
+        last_title = current_title
+        last_time = time.time()
 
-        time.sleep(INTERVAL)
+    except Exception:
+
+        with open(
+            "error.log",
+            "a",
+            encoding="utf-8"
+        ) as f:
+
+            f.write(
+                f"\n{datetime.now()}\n"
+            )
+
+            f.write(
+                traceback.format_exc()
+            )
+
+            f.write("\n")
+
+        time.sleep(5)

@@ -121,10 +121,15 @@ for entry in data:
     if not title:
         continue
 
+    duration = entry.get(
+        "duration_seconds",
+        INTERVAL
+    )
+
     category = categorize(title)
 
-    category_time[category] += INTERVAL
-    title_time[title] += INTERVAL
+    category_time[category] += duration
+    title_time[title] += duration
 
 # --------------------------------- CATEGORY BREAKDOWN
 
@@ -138,6 +143,7 @@ for category in [
     "Learning",
     "Entertainment",
     "College",
+    "System",
     "Other"
 ]:
 
