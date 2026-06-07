@@ -119,16 +119,20 @@ def save_log(data):
 # TRACKER
 # ---------------------------------
 
-
-
+print("Tracker Started...")
+print("Logging to:", LOG_FILE)
 
 last_title = None
 
+
 while True:
-
     try:
-
         title = get_active_title()
+    except Exception as e:
+        with open("error.log", "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now()} : {str(e)}\n")
+        time.sleep(5)
+        
 
         if not title:
             time.sleep(INTERVAL)
@@ -153,12 +157,3 @@ while True:
         print(entry)
 
         time.sleep(INTERVAL)
-
-    except Exception as e:
-
-        with open("error.log", "a", encoding="utf-8") as f:
-            f.write(
-                f"{datetime.now()} : {str(e)}\n"
-            )
-
-        time.sleep(5)

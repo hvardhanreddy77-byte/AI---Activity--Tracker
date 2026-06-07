@@ -6,16 +6,12 @@ from datetime import datetime
 from ollama import chat
 from plyer import notification
 
-# ---------------------------------
-# TODAY'S LOG FILE
-# ---------------------------------
+# --------------------------------- TODAY'S LOG FILE
 
 today = datetime.now().strftime("%Y-%m-%d")
 LOG_FILE = f"logs/{today}.json"
 
-# ---------------------------------
-# LOAD LOG
-# ---------------------------------
+# ---------------------------------LOAD LOG
 
 try:
     with open(LOG_FILE, "r", encoding="utf-8") as f:
@@ -29,9 +25,7 @@ if not data:
     print("No activity found")
     exit()
 
-# ---------------------------------
-# CATEGORIZATION
-# ---------------------------------
+# ---------------------------------CATEGORIZATION
 
 def categorize(title):
 
@@ -112,9 +106,8 @@ def categorize(title):
     return "Other"
 
 
-# ---------------------------------
-# TIME SPENT ANALYSIS
-# ---------------------------------
+# ---------------------------------TIME SPENT ANALYSIS
+
 
 INTERVAL = 15  # seconds between logs
 
@@ -133,9 +126,8 @@ for entry in data:
     category_time[category] += INTERVAL
     title_time[title] += INTERVAL
 
-# ---------------------------------
-# CATEGORY BREAKDOWN
-# ---------------------------------
+# --------------------------------- CATEGORY BREAKDOWN
+
 
 total_seconds = sum(category_time.values())
 
@@ -164,9 +156,7 @@ for category in [
         f"({percent}%)\n"
     )
 
-# ---------------------------------
-# TOP ACTIVITIES BY TIME
-# ---------------------------------
+# ---------------------------------TOP ACTIVITIES BY TIME
 
 top_activities = sorted(
     title_time.items(),
@@ -185,9 +175,8 @@ for title, seconds in top_activities:
         f"{minutes} minutes\n"
     )
 
-# ---------------------------------
-# MOST TIME SPENT
-# ---------------------------------
+# --------------------------------- MOST TIME SPENT
+
 
 most_title, most_seconds = max(
     title_time.items(),
@@ -198,9 +187,7 @@ most_minutes = round(
     most_seconds / 60,
     1
 )
-# ---------------------------------
-# AI PROMPT
-# ---------------------------------
+# ---------------------------------AI PROMPT
 prompt = f"""
 You are a personal productivity analyst.
 
@@ -258,9 +245,8 @@ SUMMARY:
 TOMORROW:
 ...
 """
-# ---------------------------------
-# OLLAMA
-# ---------------------------------
+# ---------------------------------OLLAMA(locally running AI model)
+
 
 print("\nTOP ACTIVITIES:")
 print(top_text)
@@ -282,15 +268,12 @@ response = chat(
 
 summary = response["message"]["content"]
 
-# ---------------------------------
-# PRINT
-# ---------------------------------
+# --------------------------------- PRINT
+
 
 print(summary)
 
-# ---------------------------------
-# SAVE SUMMARY
-# ---------------------------------
+# ---------------------------------SAVE SUMMARY-
 
 os.makedirs("summaries", exist_ok=True)
 
@@ -299,9 +282,8 @@ SUMMARY_FILE = f"summaries/{today}.txt"
 with open(SUMMARY_FILE, "w", encoding="utf-8") as f:
     f.write(summary)
 
-# ---------------------------------
-# NOTIFICATION
-# ---------------------------------
+# ---------------------------------NOTIFICATION
+
 
 short_summary = (
     f"Most time: {most_title}\n"
@@ -314,9 +296,7 @@ notification.notify(
     timeout=20
 )
 
-# ---------------------------------
-# OPEN SUMMARY
-# ---------------------------------
+# --------------------------------- OPEN SUMMARY
 print("Summary path:", SUMMARY_FILE)
 print("Exists:", os.path.exists(SUMMARY_FILE))
 print(os.path.abspath(SUMMARY_FILE))
