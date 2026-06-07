@@ -1,5 +1,4 @@
-with open("startup_test.txt", "a") as f:
-    f.write("Tracker started\n")
+
 import json
 
 import os
@@ -13,7 +12,7 @@ import pygetwindow as gw
 # ---------------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
+os.chdir(BASE_DIR)
 LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -120,41 +119,46 @@ def save_log(data):
 # TRACKER
 # ---------------------------------
 
-print("Tracker Started...")
-print("Logging to:", LOG_FILE)
+
+
 
 last_title = None
 
 while True:
 
-    title = get_active_title()
+    try:
 
-    if not title:
+        title = get_active_title()
+
+        if not title:
+            time.sleep(INTERVAL)
+            continue
+
+        if title == last_title:
+            time.sleep(INTERVAL)
+            continue
+
+        last_title = title
+
+        entry = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "site": get_site(title),
+            "title": title
+        }
+
+        data = load_log()
+        data.append(entry)
+        save_log(data)
+
+        print(entry)
 
         time.sleep(INTERVAL)
-        continue
 
-    if title == last_title:
+    except Exception as e:
 
-        time.sleep(INTERVAL)
-        continue
+        with open("error.log", "a", encoding="utf-8") as f:
+            f.write(
+                f"{datetime.now()} : {str(e)}\n"
+            )
 
-    last_title = title
-
-    entry = {
-        "timestamp": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
-        "site": get_site(title),
-        "title": title
-    }
-
-    data = load_log()
-
-    data.append(entry)
-
-    save_log(data)
-
-    print(entry)
-
-    time.sleep(INTERVAL)
+        time.sleep(5)

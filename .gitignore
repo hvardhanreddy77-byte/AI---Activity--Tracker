@@ -3,3 +3,7 @@ logs/
 summaries/
 __pycache__/
 *.pyc
+
+alive.txt
+startup_test.txt
+error.log
